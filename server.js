@@ -7,7 +7,7 @@ const port = process.env.PORT || 5000;
 
 app.use(cors());
 app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({ extended:true}));
+app.use(bodyParser.urlencoded({ extended: true }));
 
 const data = fs.readFileSync('./database.json');
 // const conf = JSON.parse(data);
@@ -16,25 +16,25 @@ const mysql = require('mysql');
 const connection = mysql.createConnection({
   host: 'localhost',
   user: 'root',
-  password:'1234',
-  database:'management'
+  password: '1234',
+  database: 'management'
 });
 connection.connect();
 
 
 const multer = require('multer');
-const upload = multer({dest: './upload'})
+const upload = multer({ dest: './upload' })
 
 app.get('/api/customers', (req, res) => {
 
-    connection.query(
-      "SELECT * FROM customer ",
-      (err, rows, fields) => {
-        res.header("Access-Control-Allow-Origin", "*");
-        res.header("Access-Control-Allow-Headers", "X-Requested-With");
-        res.send(rows);
-       }
-    );
+  connection.query(
+    "SELECT * FROM customer ",
+    (err, rows, fields) => {
+      res.header("Access-Control-Allow-Origin", "*");
+      res.header("Access-Control-Allow-Headers", "X-Requested-With");
+      res.send(rows);
+    }
+  );
 
 });
 
@@ -49,31 +49,39 @@ app.post('/api/customers', upload.single('image'), (req, res) => {
   let count = req.body.count;
   let params = [image, number, name, price, count];
   console.log(params)
-  connection.query(sql,params,
+  connection.query(sql, params,
     (err, rows) => {
-        res.send(rows);
-        console.log(rows);
+      res.send(rows);
+      console.log(rows);
     }
-);
-
-
+  );
 }
-
-
 );
 
-app.post('/api/scanner',  (req, res) => {
+app.post('/api/product', (req, res) => {
+  let number = req.body.number;
+  let sql = `SELECT * FROM customer WHERE ean='${number}'`
+  connection.query(sql,
+    (err, rows) => {
+      res.send(rows);
+      console.log(rows);
+    }
+  );
+}
+);
+
+app.post('/api/scanner', (req, res) => {
   let sql = "INSERT INTO sn (name) VALUES (?)";
   var name = req.body.name
   console.log(req.body)
   let params = [name];
   console.log(params)
-  connection.query(sql,params,
+  connection.query(sql, params,
     (err, rows) => {
-        res.send(rows);
-        console.log(rows);
+      res.send(rows);
+      console.log(rows);
     }
-);
+  );
 
 
 }
@@ -81,14 +89,17 @@ app.post('/api/scanner',  (req, res) => {
 
 );
 
+
+
+
 app.delete('/api/customers/:id', (req, res) => {
-    let sql = 'UPDATE customer SET isDeleted = 1 WHERE id = ?';
-    let params = [req.params.id];
-    connection.query(sql, params,
-      (err, rows, fields) => {
-          res.send(rows);
-      }
-    )
+  let sql = 'UPDATE customer SET isDeleted = 1 WHERE id = ?';
+  let params = [req.params.id];
+  connection.query(sql, params,
+    (err, rows, fields) => {
+      res.send(rows);
+    }
+  )
 });
 
 app.listen(5000, () => console.log(`Listening on port ${port}`));
