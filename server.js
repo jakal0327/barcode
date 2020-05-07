@@ -60,8 +60,8 @@ app.post('/api/customers', upload.single('image'), (req, res) => {
 
 app.post('/api/product', (req, res) => {
   let number = req.body.number;
-  let sql = `SELECT * FROM customer WHERE ean='${number}'`
-  connection.query(sql,
+  let sql = `SELECT * FROM customer WHERE ean=?`
+  connection.query(sql, [number],
     (err, rows) => {
       res.send(rows);
       console.log(rows);
